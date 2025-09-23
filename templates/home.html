@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="nav">
+    <span>Welcome, {{ user.username }}!</span>
+    <a href="/change-password">Change Password</a>
+    <a href="/logout">Logout</a>
+</div>
+
+<h3>Create Post</h3>
+<form method="post" action="/post">
+    <div class="form-group">
+        <textarea name="content" placeholder="What's on your mind?" rows="3" required></textarea>
+    </div>
+    <div class="form-group">
+        <label><input type="checkbox" name="is_public" value="true" checked> Public post</label>
+    </div>
+    <button type="submit">Post</button>
+</form>
+
+<h3>Posts</h3>
+{% for post in posts %}
+<div class="post {% if not post.is_public %}private{% endif %}">
+    <strong>{{ post.author.username }}</strong>
+    {% if not post.is_public %}<span style="color: #856404;">(Private)</span>{% endif %}
+    <br>
+    <p>{{ post.content }}</p>
+    <small>{{ post.created_at.strftime('%Y-%m-%d %H:%M') }}</small>
+</div>
+{% endfor %}
+{% endblock %}

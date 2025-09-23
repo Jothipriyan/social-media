@@ -1,0 +1,13 @@
+***Application Development***
+Develop an application using a python programming language.
+
+The application should include the following features:
+Features Required:
+Login/Signup:
+Users should have the ability to create a new account with required information (such as username, email, password) or log in using existing credentials.
+Change Password:
+Users should be able to change their passwords. Ensure that the new password is not one of the last three passwords used.
+Post Messages:
+Users should be able to post an unlimited number of text messages or content, similar to posts on social media platforms like Facebook or Instagram.
+Posts can be either public (visible to all users) or private (visible only to the user who posted them).
+Note: Ensure all user data, including passwords and posts, is securely stored.
