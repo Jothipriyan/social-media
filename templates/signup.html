@@ -1,17 +1,58 @@
 {% extends "base.html" %}
 {% block content %}
-<h2>Sign Up</h2>
-<form method="post">
-    <div class="form-group">
-        <input type="text" name="username" placeholder="Username" required>
+<div class="auth-container">
+    <div class="auth-card">
+        <div class="auth-title">
+            Create Account
+        </div>
+        {% if error %}
+        <div style="color: #dc3545; margin-bottom: 16px; text-align: center; font-size: 14px;">
+            {{ error }}
+        </div>
+        {% endif %}
+        
+        <form method="post">
+            <div class="form-group">
+                <label>Username</label>
+                <input type="text" name="username" placeholder="Choose a username" required>
+            </div>
+            <div class="form-group">
+                <label>Email</label>
+                <input type="email" name="email" placeholder="Enter your email" required>
+            </div>
+            <div class="form-group">
+                <label>Password</label>
+                <div style="position: relative;">
+                    <input type="password" name="password" id="password" placeholder="Create a password" required>
+                    <button type="button" onclick="togglePassword('password')" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: #6c757d; width: auto; padding: 0;">
+                        👁️
+                    </button>
+                </div>
+                <small style="color: #6c757d; font-size: 12px; margin-top: 4px; display: block;">
+                    Must be 8+ characters with uppercase, number, and special character
+                </small>
+            </div>
+            <button type="submit">
+                Create Account
+            </button>
+        </form>
+        <div class="auth-link">
+            <p>Already have an account? <a href="/login"><strong>Login here</strong></a></p>
+        </div>
     </div>
-    <div class="form-group">
-        <input type="email" name="email" placeholder="Email" required>
-    </div>
-    <div class="form-group">
-        <input type="password" name="password" placeholder="Password" required>
-    </div>
-    <button type="submit">Sign Up</button>
-</form>
-<p><a href="/login">Already have an account? Login</a></p>
+</div>
+
+<script>
+function togglePassword(fieldId) {
+    const field = document.getElementById(fieldId);
+    const button = field.nextElementSibling;
+    if (field.type === 'password') {
+        field.type = 'text';
+        button.innerHTML = '🙈';
+    } else {
+        field.type = 'password';
+        button.innerHTML = '👁️';
+    }
+}
+</script>
 {% endblock %}

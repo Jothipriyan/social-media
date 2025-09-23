@@ -2,10 +2,13 @@
 {% block content %}
 <div class="container">
     <div class="nav">
-        <div class="logo">
-            Nutz Socio
+        <div class="logo" style="font-size: 24px; ">
+            <b style="color: blueviolet;">Nutz Socio</b>
         </div>
         <div class="nav-links">
+            <a href="/create-post">
+                Create Post
+            </a>
             <a href="/change-password">
                 Change Password
             </a>
@@ -15,30 +18,11 @@
         </div>
     </div>
 
-    <div class="card">
-        <h3 style="margin-bottom: 16px; color: #212529; font-weight: 600;">
-            Create Post
-        </h3>
-        <form method="post" action="/post">
-            <div class="form-group">
-                <textarea name="content" placeholder="What's on your mind?" rows="4" required></textarea>
-            </div>
-            <div class="checkbox-group">
-                <input type="checkbox" name="is_public" value="true" checked id="public">
-                <label for="public">
-                    Make this post public
-                </label>
-            </div>
-            <button type="submit">
-                Share Post
-            </button>
-        </form>
-    </div>
-
     <div style="margin: 24px 0;">
-        <h3 style="color: #212529; margin-bottom: 16px; font-weight: 600;">
-            Recent Posts
-        </h3>
+        <h2 style="color: #212529; margin-bottom: 16px; font-weight: 600;">
+            <b style="color: #495057">Hello, {{ user.username }}!</b><br>
+            Dashboard
+        </h2>
     </div>
 
     {% for post in posts %}
@@ -81,6 +65,9 @@
     <div class="card" style="text-align: center; color: #6c757d;">
         <h3 style="margin-bottom: 8px;">No posts yet</h3>
         <p>Be the first to share something with the community.</p>
+        <a href="/create-post" style="color: #495057; text-decoration: none; font-weight: 500;">
+            Create your first post →
+        </a>
     </div>
     {% endif %}
 </div>

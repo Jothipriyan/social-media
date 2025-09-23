@@ -1,18 +1,212 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Social App</title>
+    <title>SocialConnect</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        body { font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; }
-        .nav { background: #f0f0f0; padding: 10px; margin-bottom: 20px; border-radius: 5px; }
-        .nav a { margin-right: 15px; text-decoration: none; color: #333; }
-        .post { border: 1px solid #ddd; padding: 15px; margin: 10px 0; border-radius: 5px; }
-        .form-group { margin: 10px 0; }
-        input, textarea, button { width: 100%; padding: 8px; margin: 5px 0; box-sizing: border-box; }
-        button { background: #007bff; color: white; border: none; cursor: pointer; border-radius: 3px; }
-        button:hover { background: #0056b3; }
-        .private { background: #fff3cd; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
+            background: #ffffff;
+            min-height: 100vh;
+            color: #212529;
+            line-height: 1.5;
+        }
+        .container { 
+            max-width: 900px; 
+            margin: 0 auto; 
+            padding: 20px;
+            min-height: 100vh;
+        }
+        .card {
+            background: #ffffff;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            padding: 24px;
+            margin: 16px 0;
+        }
+        .nav {
+            background: #ffffff;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            padding: 16px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+        .nav .logo {
+            font-size: 20px;
+            font-weight: 600;
+            color: #212529;
+        }
+        .nav .nav-links {
+            display: flex;
+            gap: 16px;
+        }
+        .nav a {
+            text-decoration: none;
+            color: #6c757d;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        .nav a:hover {
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            color: #495057;
+        }
+        .post {
+            background: #ffffff;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            padding: 20px;
+            margin: 12px 0;
+            transition: box-shadow 0.2s;
+        }
+        .post:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        .post-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+        .post-info {
+            display: flex;
+            align-items: center;
+        }
+        .delete-btn {
+            background: #f8f9fa;
+            color: #495057;
+            border: 1px solid #dee2e6;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            width: auto;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        .delete-btn:hover {
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            background: #e9ecef;
+        }
+        .avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #495057;
+            font-weight: 600;
+            margin-right: 12px;
+            font-size: 14px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .form-group {
+            margin: 16px 0;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #495057;
+            font-size: 14px;
+        }
+        input, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            font-size: 14px;
+            transition: border-color 0.2s;
+        }
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: #495057;
+            box-shadow: 0 0 0 2px rgba(73, 80, 87, 0.1);
+        }
+        button {
+            background: #ffffff;
+            color: #495057;
+            border: 2px solid #dee2e6;
+            padding: 12px 24px;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            width: 100%;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        button:hover {
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+            border-color: #adb5bd;
+        }
+        .private {
+            background: #f8f9fa;
+            box-shadow: inset 3px 0 0 #dee2e6, 0 1px 4px rgba(0,0,0,0.1);
+        }
+        .auth-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background: #f8f9fa;
+        }
+        .auth-card {
+            background: white;
+            padding: 32px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            width: 100%;
+            max-width: 400px;
+        }
+        .auth-title {
+            text-align: center;
+            margin-bottom: 24px;
+            font-size: 24px;
+            font-weight: 600;
+            color: #212529;
+        }
+        .auth-link {
+            text-align: center;
+            margin-top: 16px;
+        }
+        .auth-link a {
+            color: #495057;
+            text-decoration: none;
+        }
+        .auth-link a:hover {
+            color: #212529;
+        }
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 12px 0;
+        }
+        .checkbox-group input[type="checkbox"] {
+            width: auto;
+        }
+        .info-box {
+            background: #f8f9fa;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            border-radius: 4px;
+            padding: 12px;
+            margin: 16px 0;
+        }
+        @media (max-width: 768px) {
+            .container { padding: 16px; }
+            .nav { flex-direction: column; gap: 12px; padding: 16px; }
+            .nav-links { flex-wrap: wrap; }
+            .auth-card { margin: 16px; padding: 24px; }
+        }
     </style>
 </head>
 <body>

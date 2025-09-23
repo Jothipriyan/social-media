@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container">
+    <div class="nav">
+        <div class="logo" style="font-size: 24px;">
+            Nutz Socio
+        </div>
+        <div class="nav-links">
+            <a href="/">
+                Dashboard
+            </a>
+            <a href="/change-password">
+                Change Password
+            </a>
+            <a href="/logout">
+                Logout
+            </a>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2 style="margin-bottom: 16px; color: #212529; font-weight: 600;">
+            Create New Post
+        </h2>
+        
+        <form method="post" action="/post">
+            <div class="form-group">
+                <label>What's on your mind?</label>
+                <textarea name="content" placeholder="Share your thoughts..." rows="6" required></textarea>
+            </div>
+            
+            <div class="checkbox-group">
+                <input type="checkbox" name="is_public" value="true" checked id="public">
+                <label for="public">
+                    Make this post public (visible to everyone)
+                </label>
+            </div>
+            
+            <div style="display: flex; gap: 12px;">
+                <button type="submit" style="flex: 1;">
+                    Share Post
+                </button>
+                <a href="/" style="flex: 1; text-decoration: none;">
+                    <button type="button" style="background: #f8f9fa; color: #6c757d; border: 1px solid #dee2e6;">
+                        Cancel
+                    </button>
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <div class="info-box">
+        <p style="margin: 0; color: #495057; font-size: 14px;">
+            <strong>Privacy:</strong> Public posts are visible to all users. Private posts are only visible to you.
+        </p>
+    </div>
+</div>
+{% endblock %}

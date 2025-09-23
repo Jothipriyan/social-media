@@ -8,6 +8,7 @@ from sqlalchemy.orm import sessionmaker, Session, relationship
 from datetime import datetime, timedelta
 import bcrypt
 import os
+import re
 from jose import JWTError, jwt
 
 # Database setup
@@ -59,6 +60,22 @@ def hash_password(password: str) -> str:
 def verify_password(password: str, hashed: str) -> bool:
     return bcrypt.checkpw(password.encode('utf-8'), hashed.encode('utf-8'))
 
+def validate_password(password: str) -> str:
+    """Validate password meets requirements. Returns error message or empty string if valid."""
+    if len(password) < 8:
+        return "Password must be at least 8 characters long"
+    if not any(c.isupper() for c in password):
+        return "Password must contain at least one uppercase letter"
+    if not any(c.isdigit() for c in password):
+        return "Password must contain at least one number"
+    if not any(c in "!@#$%^&*()_+-=[]{}|;:,.<>?" for c in password):
+        return "Password must contain at least one special character"
+    return ""
+
+def is_valid_email(email: str) -> bool:
+    pattern = r'^[^@]+@[^@]+\.[^@]+$'
+    return re.match(pattern, email) is not None
+
 def create_token(username: str) -> str:
     expire = datetime.utcnow() + timedelta(hours=24)
     return jwt.encode({"sub": username, "exp": expire}, SECRET_KEY, algorithm="HS256")
@@ -76,7 +93,7 @@ def get_current_user(request: Request, db: Session = Depends(get_db)):
         return None
 
 @app.get("/", response_class=HTMLResponse)
-def home(request: Request, db: Session = Depends(get_db), user: User = Depends(get_current_user)):
+def dashboard(request: Request, db: Session = Depends(get_db), user: User = Depends(get_current_user)):
     if not user:
         return RedirectResponse("/login")
     
@@ -84,31 +101,48 @@ def home(request: Request, db: Session = Depends(get_db), user: User = Depends(g
         (Post.is_public == True) | (Post.user_id == user.id)
     ).order_by(Post.created_at.desc()).all()
     
-    return templates.TemplateResponse("home.html", {"request": request, "user": user, "posts": posts})
+    return templates.TemplateResponse("dashboard.html", {"request": request, "user": user, "posts": posts})
+
+@app.get("/create-post", response_class=HTMLResponse)
+def create_post_page(request: Request, user: User = Depends(get_current_user)):
+    if not user:
+        return RedirectResponse("/login")
+    return templates.TemplateResponse("create_post.html", {"request": request, "user": user})
 
 @app.get("/login", response_class=HTMLResponse)
 def login_page(request: Request):
     return templates.TemplateResponse("login.html", {"request": request})
 
 @app.post("/login")
-def login(username: str = Form(), password: str = Form(), db: Session = Depends(get_db)):
-    user = db.query(User).filter(User.username == username).first()
+def login(request: Request, email: str = Form(), password: str = Form(), db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.email == email).first()
     if not user or not verify_password(password, user.password):
-        raise HTTPException(status_code=400, detail="Invalid credentials")
+        return templates.TemplateResponse("login.html", {"request": request, "error": "Invalid credentials"})
     
-    token = create_token(username)
+    token = create_token(user.username)
     response = RedirectResponse("/", status_code=302)
     response.set_cookie("access_token", token, httponly=True)
     return response
 
 @app.get("/signup", response_class=HTMLResponse)
-def signup_page(request: Request):
-    return templates.TemplateResponse("signup.html", {"request": request})
+def signup_page(request: Request, error: str = None):
+    return templates.TemplateResponse("signup.html", {"request": request, "error": error})
 
 @app.post("/signup")
-def signup(username: str = Form(), email: str = Form(), password: str = Form(), db: Session = Depends(get_db)):
+def signup(request: Request, username: str = Form(), email: str = Form(), password: str = Form(), db: Session = Depends(get_db)):
+    # Validate password
+    password_error = validate_password(password)
+    if password_error:
+        return templates.TemplateResponse("signup.html", {"request": request, "error": password_error})
+    
+    if not is_valid_email(email):
+        return templates.TemplateResponse("signup.html", {"request": request, "error": "Invalid email format"})
+    
     if db.query(User).filter(User.username == username).first():
-        raise HTTPException(status_code=400, detail="Username exists")
+        return templates.TemplateResponse("signup.html", {"request": request, "error": "Username exists"})
+    
+    if db.query(User).filter(User.email == email).first():
+        return templates.TemplateResponse("signup.html", {"request": request, "error": "Email already registered"})
     
     hashed_pw = hash_password(password)
     user = User(username=username, email=email, password=hashed_pw, password_history=hashed_pw)
@@ -137,15 +171,20 @@ def change_password_page(request: Request, user: User = Depends(get_current_user
     return templates.TemplateResponse("change_password.html", {"request": request, "user": user})
 
 @app.post("/change-password")
-def change_password(current_password: str = Form(), new_password: str = Form(), user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+def change_password(request: Request, current_password: str = Form(), new_password: str = Form(), user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     if not user or not verify_password(current_password, user.password):
-        raise HTTPException(status_code=400, detail="Invalid current password")
+        return templates.TemplateResponse("change_password.html", {"request": request, "user": user, "error": "Invalid current password"})
+    
+    # Validate new password
+    password_error = validate_password(new_password)
+    if password_error:
+        return templates.TemplateResponse("change_password.html", {"request": request, "user": user, "error": password_error})
     
     # Check last 3 passwords
     history = user.password_history.split(",") if user.password_history else []
     for old_hash in history[-3:]:
         if old_hash and verify_password(new_password, old_hash):
-            raise HTTPException(status_code=400, detail="Cannot reuse recent passwords")
+            return templates.TemplateResponse("change_password.html", {"request": request, "user": user, "error": "Cannot reuse recent passwords"})
     
     new_hash = hash_password(new_password)
     history.append(user.password)
@@ -153,6 +192,19 @@ def change_password(current_password: str = Form(), new_password: str = Form(), 
     user.password_history = ",".join(history[-3:])
     db.commit()
     
+    return RedirectResponse("/", status_code=302)
+
+@app.post("/delete-post/{post_id}")
+def delete_post(post_id: int, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    
+    post = db.query(Post).filter(Post.id == post_id, Post.user_id == user.id).first()
+    if not post:
+        raise HTTPException(status_code=404, detail="Post not found or not authorized")
+    
+    db.delete(post)
+    db.commit()
     return RedirectResponse("/", status_code=302)
 
 @app.get("/logout")
